@@ -18,8 +18,11 @@ var firstMessage=true;    // What the first message, to start on the first value
 
     socket.on('new-pos', function(newPosition) { // handling new sensor values
 
-      //TODO: Map the incoming 10-bit numbers to the height and width of the screen.
-      // See https://github.com/soulwire/sketch.js/wiki/API for sketch references
+      let width = ctx.width;
+      let height = ctx.height;
+
+      newPosition[0] = map(newPosition[0], 0, 1023, 0, width);
+      newPosition[1] = map(newPosition[1], 0, 1023, 0, height);
 
       if(firstMessage){ // if its the first message store that value as previous
         firstMessage=false;
@@ -35,4 +38,47 @@ var firstMessage=true;    // What the first message, to start on the first value
         ctx.stroke(); // and only draw a stroke
         previousPosition=newPosition; // update to the new position.
        }
+    });
+    
+    socket.on('thickness', function(value) {
+      radius = value;
+    });
+
+    socket.on('color', function(value) { 
+      switch (value) {
+        case '0': 
+          COLOUR ="#f42424";
+          break;
+        case '1': 
+          COLOUR = "#f48c42";
+          break;
+        case '2': 
+          COLOUR = "#f2d21f";
+          break;
+        case '3': 
+          COLOUR = "#8cf226";
+          break;
+        case '4': 
+          COLOUR = "#01ad15";
+          break;
+        case '5': 
+          COLOUR = "#28f4ff";
+          break;
+        case '6': 
+          COLOUR = "#2800f0";
+          break;
+        case '7': 
+          COLOUR = "#8f70ff";
+          break;
+        case '8': 
+          COLOUR = "#ff07f6";
+          break;
+        case '9': 
+          COLOUR = "#505050";
+          break;
+      }
+
+      console.log(COLOUR);
+
+      ctx.fillStyle = ctx.strokeStyle = COLOUR;
     });

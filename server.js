@@ -6,6 +6,8 @@ var io = require('socket.io')(http); // connect websocket library to server
 var serverPort = 8000;
 var serialPort = require('serialport'); // serial library
 var readLine = serialPort.parsers.Readline; // read serial data as lines
+var x = 0; 
+var y = 0;
 
 //---------------------- WEBAPP SERVER SETUP ---------------------------------//
 // use express to create the simple webapp
@@ -21,8 +23,8 @@ http.listen(serverPort, function() {
 
 //---------------------- SERIAL COMMUNICATION --------------------------------//
 // start the serial port connection and read on newlines
-const serial = new serialPort('/dev/ttyUSB0', {
- baudRate:115200
+const serial = new serialPort('/dev/tty.SLAB_USBtoUART', {
+ baudRate:9600
 
 });
 const parser = new readLine({
@@ -35,7 +37,31 @@ parser.on('data', function(data) { // on data from the arduino
   if(data=='rst'){  // if its the 'rst' string call reset
     io.emit('reset');
   }else{ // any other data we try to forward by spliting it
-    var transmitData = [data.split(',')[0],data.split(',')[1]];
+    switch (data.charAt(0)) {
+      case 'c': //COLOR
+        let color = data.substring(1, data.length);
+        console.log(color); 
+        io.emit('color', color);
+        break;
+      case 'x':
+        x = data.substring(1, data.length);
+        console.log(x);
+        break;
+      case 'y':
+        y = data.substring(1, data.length);
+        console.log(y);
+        break;
+      case 'd': //DELETE
+        io.emit('reset');
+        break;
+      case 't': //THICKNESS
+        let thickness = data.substring(1, data.length)
+        io.emit('thickness', thickness);
+        break;
+      default:
+        console.log('hi');
+    }
+    var transmitData = [x,y];
     io.emit('new-pos', transmitData);
   }
 });
